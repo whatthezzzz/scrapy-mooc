@@ -12,6 +12,7 @@ BOT_NAME = 'mooc'
 SPIDER_MODULES = ['mooc.spiders']
 NEWSPIDER_MODULE = 'mooc.spiders'
 
+LOG_LEVEL = 'WARNING'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'mooc (+http://www.yourdomain.com)'
@@ -62,9 +63,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'mooc.pipelines.MoocPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'mooc.pipelines.MoocPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
