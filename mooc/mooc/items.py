@@ -9,4 +9,5 @@ import scrapy
 class MoocItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+    file_url = scrapy.Field()
+    file_name = scrapy.Field()
