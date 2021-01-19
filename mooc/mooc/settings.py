@@ -15,7 +15,7 @@ NEWSPIDER_MODULE = 'mooc.spiders'
 LOG_LEVEL = 'WARNING'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'mooc (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True

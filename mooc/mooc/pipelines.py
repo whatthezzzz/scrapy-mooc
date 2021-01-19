@@ -1,11 +1,4 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-
-# useful for handling different item types with a single interface
-import urllib.request
+import wget
 from itemadapter import ItemAdapter
 import time
 import json
@@ -19,10 +12,12 @@ MONGO_TABLE = "course"
 client = MongoClient(MONGO_URL)
 db = client[MONGO_DB]
 
+title = ''
 outline = {}
 play_list = []
 subtitles = []
 WORK_DIR = ''
+
 
 def save_to_mongo(data):
     if db[MONGO_TABLE].insert(data):
@@ -56,19 +51,11 @@ def parse_resource(resource):
             play_info['name'] = file_name
             play_info['video_url'] = url
 
-            # print("downloading with urllib")
-            # f = urllib.request.urlopen(url)
-            # data = f.read()
-            # with open("H:\\test\\" + file_name + ext, "wb") as code:
-            #     code.write(data)
-            #
+
             # if not os.path.exists(data_path + r'\\' + attachment_name):
             #     with open(data_path + r'\\' + attachment_name, 'wb')as f:
             #         f.write(response.body)
             break
-
-
-
 
     subtitles = re.findall(r'name="(.+)";.*url="(.*?)"', res)
     for subtitle in subtitles:
@@ -103,7 +90,6 @@ def get_resource(term_id):
         lesson_list = []
         for lesson in lessons:
             counter.add(1)
-
             lesson_list.append(lesson[1])
             outline[chapter[1]] = lesson_list
 
@@ -129,6 +115,11 @@ class MoocPipeline:
         pass
 
     def process_item(self, item, spider):
+
+        # url = "http://v.stu.126.net/mooc-video/nos/mp4/2014/10/07/767066_shd.mp4?ak=99ed7479ee303d1b1361b0ee5a4abcee16ae4ce712937296ff3986859271d8e82d1bcfb40cd18af50a5e8be829ba25a9903640367c065301c0080d94090336bf9b46b9855d0675c5a10feed45ecb1b08e570cb013ee6bee3bd53b5f0f4fb4e5b07170b06bfbe5442a18d44011e73c7855a01f38ccf0c565cdbfe5253f27cdaa540e23b55d9d3423ee3c83cfaa6477cdbba65555b4389e0502aaf0f357cd5c654da4e9c73bda29d9db6ca663c389ed848"
+        #
+        # wget.download(url, 'H:\course')
+
         if spider.name == 'course':
             get_resource(item["term_id"])
         else:
