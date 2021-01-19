@@ -1,4 +1,5 @@
 import wget
+import logging
 from itemadapter import ItemAdapter
 import time
 import json
@@ -9,7 +10,7 @@ from pymongo import MongoClient
 
 class MoocPipeline:
     data_path = 'H:/course/'
-    MONGO_URL = "mongodb://localhost:27017"
+    MONGO_URL = "mongodb://10.215.42.31:27017"
     MONGO_DB = "mooc_spider"
     MONGO_TABLE = "course"
 
@@ -21,7 +22,7 @@ class MoocPipeline:
     subtitles = []
     WORK_DIR = ''
 
-    def parse_resource(self, resource):
+    def parse_resource(self, resource, counter):
         post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190',
                      'httpSessionId': '5531d06316b34b9486a6891710115ebc', 'c0-scriptName': 'CourseBean',
                      'c0-methodName': 'getLessonUnitLearnVo', 'c0-id': '0', 'c0-param0': 'number:' + resource[0],
@@ -29,13 +30,15 @@ class MoocPipeline:
                      'c0-param3': 'number:' + resource[2], 'batchId': str(int(time.time()) * 1000)}
         res = requests.post('https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr',
                             params=post_data).text
-        file_name = resource[3]
-
+        file_name = resource[3].strip()
+        index_dunhao = file_name.find("、")
+        if index_dunhao != -1:
+            file_name = "{}{}".format(counter, file_name.split("、")[1])
+        else:
+            file_name = "{}{}".format(counter, file_name)
         index = file_name.find(".")
         if index != -1:
             file_name = file_name.replace(".", "-")
-            file_name = file_name.replace("、", "")
-
         resolutions = ['Shd', 'Hd', 'Sd']
         play_info = {}
         for sp in resolutions:
@@ -47,12 +50,17 @@ class MoocPipeline:
                 play_info['name'] = file_name
                 play_info['video_url'] = url
 
-                r = requests.get(url)
-                if not os.path.exists(self.data_path + r'\video\\' + file_name + ext):
-                    with open(self.data_path + r'\video\\' + file_name + ext, 'wb')as f:
-                        f.write(r.content)
-                play_info['video_path'] = self.data_path + r'\video\\' + file_name + ext
-                break
+                logging.info("正在下载： {} ".format(file_name + ext))
+                try:
+                    r = requests.get(url)
+                    if not os.path.exists(self.data_path + r'\video\\' + file_name + ext):
+                        with open(self.data_path + r'\video\\' + file_name + ext, 'wb')as f:
+                            f.write(r.content)
+                    play_info['video_path'] = self.data_path + r'\video\\' + file_name + ext
+                    logging.info("下载成功！")
+                    break
+                except Exception as e:
+                    logger.erro("下载失败：{}  {}".format(file_name, url), e)
 
         subtitles = re.findall(r'name="(.+)";.*url="(.*?)"', res)
         for subtitle in subtitles:
@@ -61,12 +69,21 @@ class MoocPipeline:
             else:
                 subtitle_lang = subtitle[0].encode('utf_8').decode('unicode_escape')
                 sub_name = file_name + '_' + subtitle_lang + '.srt'
-            r = requests.get(subtitle[1])
-            if not os.path.exists(self.data_path + r'\video\\' + sub_name):
-                with open(self.data_path + r'\video\\' + sub_name, 'wb')as f:
-                    f.write(r.content)
-            play_info['sub_url'] = subtitle[1]
-            play_info['sub_path'] = self.data_path + r'\video\\' + sub_name
+
+            try:
+                r = requests.get(subtitle[1])
+                play_info['sub_url'] = subtitle[1]
+                if not os.path.exists(self.data_path + r'\video\\' + sub_name):
+                    with open(self.data_path + r'\video\\' + sub_name, 'wb')as f:
+                        f.write(r.content)
+                play_info['sub_path'] = self.data_path + r'\video\\' + sub_name
+                logging.info("下载成功！")
+            except Exception as e:
+                logger.erro("下载失败：{}  {}".format(sub_name, subtitle[1]), e)
+
+
+
+
         self.play_list.append(play_info)
 
     def save_to_mongo(self, data):
@@ -111,9 +128,8 @@ class MoocPipeline:
                             os.mkdir(self.data_path + r'\video')
                         except FileExistsError:
                             pass
-                        self.parse_resource(video)
+                        self.parse_resource(video, counter)
                     video_list.append(video[3])
-                # print(video_list)
 
                 # 课件
                 pdfs = re.findall(r'contentId=(\d+).+contentType=(3).+id=(\d+).+lessonId=' +
@@ -128,12 +144,11 @@ class MoocPipeline:
                 os.mkdir(self.data_path)
             except FileExistsError:
                 pass
-
             self.get_resource(item["term_id"])
         else:
             return
 
         item['outline'] = self.outline
         item['play_list'] = self.play_list
-        # self.save_to_mongo(item)
+        self.save_to_mongo(item)
         return item

@@ -13,7 +13,7 @@ SPIDER_MODULES = ['mooc.spiders']
 NEWSPIDER_MODULE = 'mooc.spiders'
 
 LOG_LEVEL = 'WARNING'
-
+LOG_FILE = './logs/'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
 
