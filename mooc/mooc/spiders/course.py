@@ -34,7 +34,6 @@ class CourseSpider(scrapy.Spider):
             for staff in staffLector:
                 lectors.append(staff)
         item['lector'] = lectors
-
         yield item
 
     def parse_detail(self, response):
