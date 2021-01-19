@@ -1,12 +1,8 @@
-import wget
-import logging
-from itemadapter import ItemAdapter
+
 import time
-import json
-from collections import defaultdict
 from .utils import *
 from pymongo import MongoClient
-
+from .course_logger import logger
 
 class MoocPipeline:
     data_path = 'H:/course/'
@@ -50,14 +46,14 @@ class MoocPipeline:
                 play_info['name'] = file_name
                 play_info['video_url'] = url
 
-                logging.info("正在下载： {} ".format(file_name + ext))
+                logger.info("正在下载： {} ".format(file_name + ext))
                 try:
                     r = requests.get(url)
                     if not os.path.exists(self.data_path + r'\video\\' + file_name + ext):
                         with open(self.data_path + r'\video\\' + file_name + ext, 'wb')as f:
                             f.write(r.content)
                     play_info['video_path'] = self.data_path + r'\video\\' + file_name + ext
-                    logging.info("下载成功！")
+                    logger.info("下载成功！")
                     break
                 except Exception as e:
                     logger.erro("下载失败：{}  {}".format(file_name, url), e)
@@ -77,12 +73,9 @@ class MoocPipeline:
                     with open(self.data_path + r'\video\\' + sub_name, 'wb')as f:
                         f.write(r.content)
                 play_info['sub_path'] = self.data_path + r'\video\\' + sub_name
-                logging.info("下载成功！")
+                logger.info("下载成功！")
             except Exception as e:
                 logger.erro("下载失败：{}  {}".format(sub_name, subtitle[1]), e)
-
-
-
 
         self.play_list.append(play_info)
 
