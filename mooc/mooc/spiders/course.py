@@ -6,14 +6,14 @@ import demjson
 class CourseSpider(scrapy.Spider):
     name = 'course'
     allowed_domains = ['icourse163.org']
-    start_urls = ['https://www.icourse163.org/course/NUDT-42002',
+    start_urls = [
                   'https://www.icourse163.org/course/HIT-1460916174',
-                  'https://www.icourse163.org/course/SWJTU-1460738163',
-                  'https://www.icourse163.org/course/NCU-1205811824',
-                  'https://www.icourse163.org/course/SCU-1003488005',
-                  'https://www.icourse163.org/course/BUAA-1206178801',
-                  'https://www.icourse163.org/course/SICNU-1207430822',
-                  'https://www.icourse163.org/course/UIBE-1003092002',
+                  # 'https://www.icourse163.org/course/SWJTU-1460738163',
+                  # 'https://www.icourse163.org/course/NCU-1205811824',
+                  # 'https://www.icourse163.org/course/SCU-1003488005',
+                  # 'https://www.icourse163.org/course/BUAA-1206178801',
+                  # 'https://www.icourse163.org/course/SICNU-1207430822',
+                  # 'https://www.icourse163.org/course/UIBE-1003092002',
                   ]
 
     def start_requests(self):

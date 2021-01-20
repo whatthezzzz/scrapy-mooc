@@ -52,7 +52,7 @@ class MoocPipeline:
                     if not os.path.exists(self.data_path + r'\video\\' + file_name + ext):
                         with open(self.data_path + r'\video\\' + file_name + ext, 'wb')as f:
                             f.write(r.content)
-                    play_info['video_path'] = self.data_path + r'\video\\' + file_name + ext
+                    play_info['video_path'] = self.data_path + "/video/" + file_name + ext
                     logger.info("下载成功！")
                     break
                 except Exception as e:
@@ -72,16 +72,16 @@ class MoocPipeline:
                 if not os.path.exists(self.data_path + r'\video\\' + sub_name):
                     with open(self.data_path + r'\video\\' + sub_name, 'wb')as f:
                         f.write(r.content)
-                play_info['sub_path'] = self.data_path + r'\video\\' + sub_name
+                play_info['sub_path'] = self.data_path + "/video/" + sub_name
                 logger.info("下载成功！")
             except Exception as e:
                 logger.erro("下载失败：{}  {}".format(sub_name, subtitle[1]), e)
-
-        self.play_list.append(play_info)
+        if play_info:
+            self.play_list.append(play_info)
 
     def save_to_mongo(self, data):
         if self.db[self.MONGO_TABLE].insert(data):
-            print("SAVE SUCCESS", data)
+            logger.info("SAVE SUCCESS", data)
             return True
         return False
 
@@ -93,7 +93,6 @@ class MoocPipeline:
         CONFIG = {}
         pdf_list = []
         video_list = []
-        rich_text_list = []
         post_data = {'callCount': '1', 'scriptSessionId': '${scriptSessionId}190', 'c0-scriptName': 'CourseBean',
                      'c0-methodName': 'getMocTermDto', 'c0-id': '0', 'c0-param0': 'number:' + term_id,
                      'c0-param1': 'number:0', 'c0-param2': 'boolean:true', 'batchId': str(int(time.time()) * 1000)}
@@ -131,6 +130,10 @@ class MoocPipeline:
                     counter.add(2)
 
     def process_item(self, item, spider):
+
+        self.data_path = 'H:/course/'
+        self.outline = {}
+
         if spider.name == 'course':
             self.data_path = os.path.join(self.data_path, item['title'])
             try:
