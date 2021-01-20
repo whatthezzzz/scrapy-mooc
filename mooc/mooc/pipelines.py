@@ -1,17 +1,12 @@
-
 import time
 from .utils import *
-from pymongo import MongoClient
+import pymongo
 from .course_logger import logger
+
 
 class MoocPipeline:
     data_path = 'H:/course/'
-    MONGO_URL = "mongodb://10.215.42.31:27017"
-    MONGO_DB = "mooc_spider"
-    MONGO_TABLE = "course"
-
-    client = MongoClient(MONGO_URL)
-    db = client[MONGO_DB]
+    collection_name = "course"
 
     outline = {}
     play_list = []
@@ -80,13 +75,28 @@ class MoocPipeline:
             self.play_list.append(play_info)
 
     def save_to_mongo(self, data):
-        if self.db[self.MONGO_TABLE].insert(data):
+        if self.db[self.collection_name].insert(data):
             logger.info("SAVE SUCCESS", data)
             return True
         return False
 
-    def __init__(self):
-        pass
+    def __init__(self, mongo_uri, mongo_db):
+        self.mongo_uri = mongo_uri
+        self.mongo_db = mongo_db
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_db=crawler.settings.get('MONGO_DATABASE', 'items')
+        )
+
+    def open_spider(self, spider):
+        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+
+    def close_spider(self, spider):
+        self.client.close()
 
     def get_resource(self, term_id):
         counter = Counter()

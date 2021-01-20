@@ -12,8 +12,10 @@ BOT_NAME = 'mooc'
 SPIDER_MODULES = ['mooc.spiders']
 NEWSPIDER_MODULE = 'mooc.spiders'
 
-LOG_LEVEL = 'WARNING'
-# LOG_FILE = './logs/'
+LOG_LEVEL = "WARNING"
+LOG_ENABLED = True
+
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
 
@@ -89,3 +91,6 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+MONGO_URI = "localhost:27017"
+MONGO_DATABASE = "mooc_spider"
+
